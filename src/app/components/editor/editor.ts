@@ -65,19 +65,19 @@ export const EDITOR_VALUE_ACCESSOR: any = {
     providers: [EDITOR_VALUE_ACCESSOR]
 })
 export class Editor implements AfterViewInit,ControlValueAccessor {
-        
+
     @Output() onTextChange: EventEmitter<any> = new EventEmitter();
-    
+
     @Output() onSelectionChange: EventEmitter<any> = new EventEmitter();
-    
+
     @ContentChild(Header, { static: false }) toolbar;
-    
+
     @Input() style: any;
-        
+
     @Input() styleClass: string;
-    
+
     @Input() placeholder: string;
-    
+
     @Input() formats: string[];
 
     @Input() modules: any;
@@ -87,24 +87,24 @@ export class Editor implements AfterViewInit,ControlValueAccessor {
     @Input() scrollingContainer: any;
 
     @Input() debug: string;
-    
+
     @Output() onInit: EventEmitter<any> = new EventEmitter();
-    
+
     value: string;
-    
+
     _readonly: boolean;
-    
+
     onModelChange: Function = () => {};
-    
+
     onModelTouched: Function = () => {};
-    
+
     quill: any;
-    
+
     constructor(public el: ElementRef) {}
 
     ngAfterViewInit() {
-        let editorElement = DomHandler.findSingle(this.el.nativeElement ,'div.ui-editor-content'); 
-        let toolbarElement = DomHandler.findSingle(this.el.nativeElement ,'div.ui-editor-toolbar'); 
+        let editorElement = DomHandler.findSingle(this.el.nativeElement ,'div.ui-editor-content');
+        let toolbarElement = DomHandler.findSingle(this.el.nativeElement ,'div.ui-editor-toolbar');
         let defaultModule  = {toolbar: toolbarElement};
         let modules = this.modules ? {...defaultModule, ...this.modules} : defaultModule;
 
@@ -118,11 +118,11 @@ export class Editor implements AfterViewInit,ControlValueAccessor {
           debug: this.debug,
           scrollingContainer: this.scrollingContainer
         });
-                
+
         if(this.value) {
-            this.quill.pasteHTML(this.value);
+            this.quill.setText(this.value);
         }
-        
+
         this.quill.on('text-change', (delta, oldContents, source) => {
             if (source === 'user') {
                 let html = editorElement.children[0].innerHTML;
@@ -137,12 +137,12 @@ export class Editor implements AfterViewInit,ControlValueAccessor {
                     delta: delta,
                     source: source
                 });
-                
+
                 this.onModelChange(html);
                 this.onModelTouched();
             }
         });
-        
+
         this.quill.on('selection-change', (range, oldRange, source) => {
             this.onSelectionChange.emit({
                 range: range,
@@ -150,23 +150,23 @@ export class Editor implements AfterViewInit,ControlValueAccessor {
                 source: source
             });
         });
-        
+
         this.onInit.emit({
             editor: this.quill
         });
     }
-        
+
     writeValue(value: any) : void {
         this.value = value;
-                
+
         if(this.quill) {
             if(value)
-                this.quill.pasteHTML(value);
+                this.quill.setText(value);
             else
                 this.quill.setText('');
         }
     }
-    
+
     registerOnChange(fn: Function): void {
         this.onModelChange = fn;
     }
@@ -174,18 +174,18 @@ export class Editor implements AfterViewInit,ControlValueAccessor {
     registerOnTouched(fn: Function): void {
         this.onModelTouched = fn;
     }
-    
+
     getQuill() {
         return this.quill;
     }
-    
+
     @Input() get readonly(): boolean {
         return this._readonly;
     }
 
     set readonly(val:boolean) {
         this._readonly = val;
-        
+
         if(this.quill) {
             if(this._readonly)
                 this.quill.disable();
